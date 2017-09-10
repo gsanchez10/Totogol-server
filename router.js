@@ -26,6 +26,7 @@ module.exports = function(app) {
 	TODO: crear un middleware que verifique si el usuario es administrador para que permita hacer llamar los servicios de
 	administrador solo a los administradores
 	*/
-
+	app.get('/playerFechas', requireAuth, Play.getPlayersFechas);
 	app.post('/changePlayerGoals', requireAuth, Play.changePlayerGoals);
+	app.get('/userInfo', requireAuth, Authentication.getUser);
 }
