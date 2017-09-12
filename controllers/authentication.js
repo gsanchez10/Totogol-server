@@ -19,13 +19,10 @@ exports.getUser = function(req, res, next) {
 };
 
 exports.signup = function(req, res, next) {
-	const email = req.body.email;
-	const password = req.body.password;
-	const name = req.body.name;
-	const phone = req.body.phone;
+	const { email, password, name, username } = req.body;
 
 	if(!email || !password) {
-		return res.status(422).send({ error: 'You must provide email and password.'});
+		return res.status(422).send({ error: 'Debe indicar un usuario y una contraseña.'});
 	}
 
 	// See if a user with a given email exists
@@ -34,7 +31,7 @@ exports.signup = function(req, res, next) {
 
 		// If a user with email does exist, return an error
 		if(existingUser) {
-			return res.status(422).send({ error: 'Email is in use' });
+			return res.status(422).send({ error: 'Ya hay alguien registrado con ese correo.' });
 		}
 
 		// If a user with email does NOT exist, create and save user record
@@ -42,7 +39,7 @@ exports.signup = function(req, res, next) {
 			email: email,
 			password: password,
 			name: name,
-			phone: phone
+			username: username
 		});
 
 		user.save(function(err) {
@@ -50,6 +47,27 @@ exports.signup = function(req, res, next) {
 
 			// Respond to request indicating the user was created
 			res.json({ token: tokenForUser(user) });
+		});
+	});
+}
+
+exports.changePassword = function(req, res, next) {
+	const { username, password } = req.body;
+
+	if(!password) {
+		return res.status(422).send({ error: 'Ingrese una contraseña.'});
+	}
+
+	// See if a user with a given email exists
+	User.findOne({ username }, function(err, user) {
+		if(err) { return next(err); }
+		user.password = password;
+
+		user.save(function(err) {
+			if(err) { return next(err); }
+
+			// Respond to request indicating the user was created
+			res.json({ token: tokenForUser(user), result: true });
 		});
 	});
 }

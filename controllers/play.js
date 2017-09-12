@@ -1,40 +1,38 @@
 const User = require('../models/user');
+const Fecha = require('../models/fecha');
 const _ = require('lodash');
 
 exports.changePlayerGoals = function(req, res, next) {
   const { fechas, username } = req.body;
 
-  User.findOne({'username': username}, function(err, user) {
-    const userFechas = _.cloneDeep(user.fechas);
-    
-    fechas.forEach(currentFecha => {
-      const fechaToUpdate = userFechas.find(userFecha => currentFecha.number === userFecha.number);
-      const now = new Date();
-      const closingDate = new Date(fechaToUpdate.closingDate);
-      console.log('fechatoupdte closing date', fechaToUpdate.closingDate);
-      console.log('now', now);
-      console.log('now less than fecha to update closing date', now < closingDate);
-      if(!fechaToUpdate) {
-        userFechas.push(currentFecha);
-      }else
-      if(now < closingDate) {
-        fechaToUpdate.games = currentFecha.games;
-        /*console.log('games', userFechas[userFechas.indexOf(fechaToUpdate)].games);
-        console.log('current fecha games', currentFecha.games);
-        userFechas[userFechas.indexOf(fechaToUpdate)].games = currentFecha.games;
-        //console.log('games', userFechas[userFechas.indexOf(fechaToUpdate)].games);*/
-      }
-    });
+  Fecha.find({}, function(err, systemFechas) {
+    User.findOne({'username': username}, function(err, user) {
+      const userFechas = _.cloneDeep(user.fechas);
+      
+      fechas.forEach(currentFecha => {
+        const systemFecha = systemFechas.find(systemFecha => systemFecha.number === currentFecha.number);
+        const fechaToUpdate = userFechas.find(userFecha => currentFecha.number === userFecha.number);
+        const now = new Date();
+        const closingDate = new Date(systemFecha.closingDate);
 
-    User.findOneAndUpdate({'username': username},
-      {$set: {'fechas': userFechas}},
-      {new: true},
-      function(err, updatedRows) {
-        if(err) { return next(err); }
-        console.log('updated rows', updatedRows.fechas[3]);
-        res.json({ result: true, user: updatedRows });
-      }
-    );
+        if(!fechaToUpdate) {
+          userFechas.push(currentFecha);
+        }else
+        if(now < closingDate) {
+          fechaToUpdate.games = currentFecha.games;
+        }
+      });
+
+      User.findOneAndUpdate({'username': username},
+        {$set: {'fechas': userFechas}},
+        {new: true},
+        function(err, updatedRows) {
+          if(err) { return next(err); }
+          console.log('updated rows', updatedRows.fechas[3]);
+          res.json({ result: true, user: updatedRows });
+        }
+      );
+    });
   });
 
   /* User.update({'username': username},
@@ -133,5 +131,12 @@ exports.getPlayersFechas = function(req, res, next) {
     if(err) { return next(err); }
 
     res.json({ result: true, fechas: user.fechas });
+  });
+};
+
+exports.getPlayers = function(req, res, next) {
+  User.find({}, function(err, users) {
+
+    res.send(users);
   });
 };

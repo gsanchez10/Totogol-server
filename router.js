@@ -22,6 +22,7 @@ module.exports = function(app) {
 	app.post('/deleteGame', requireAuth, Games.deleteGame);
 	app.post('/signin', requireSignin, Authentication.signin);
 	app.post('/signup', Authentication.signup);
+	app.post('/changePassword', requireAuth, Authentication.changePassword);
 	/*
 	TODO: crear un middleware que verifique si el usuario es administrador para que permita hacer llamar los servicios de
 	administrador solo a los administradores
@@ -29,4 +30,5 @@ module.exports = function(app) {
 	app.get('/playerFechas', requireAuth, Play.getPlayersFechas);
 	app.post('/changePlayerGoals', requireAuth, Play.changePlayerGoals);
 	app.get('/userInfo', requireAuth, Authentication.getUser);
+	app.get('/getPlayers', requireAuth, Play.getPlayers);
 }
