@@ -20,6 +20,13 @@ exports.changePlayerGoals = function(req, res, next) {
         }else
         if(now < closingDate) {
           fechaToUpdate.games = currentFecha.games;
+          fechaToUpdate.games = fechaToUpdate.games.filter(gameToUpdate =>
+            systemFecha.games.find(systemGame =>
+              systemGame.number === gameToUpdate.number &&
+              systemGame.homeTeam === gameToUpdate.homeTeam &&
+              systemGame.awayTeam === gameToUpdate.awayTeam
+            )
+          );
         }
       });
 
