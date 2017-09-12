@@ -14,6 +14,9 @@ exports.addFecha = function(req, res, next) {
 	if(!number) {
 		return res.status(422).send({ error: 'Debe proveer un numero de fecha.'});
 	}
+	if(!req.user.canAdmin) {
+		return res.status(422).send({ error: 'Debe ser un administrador para modificar este valor.'});	
+	}
 
 	Fecha.findOne({ number }, function(err, existingFecha) {
 		if(err) { return next(err); }
@@ -39,6 +42,9 @@ exports.addFecha = function(req, res, next) {
 };
 
 exports.addGame = function(req, res, next) {
+	if(!req.user.canAdmin) {
+		return res.status(422).send({ error: 'Debe ser un administrador para modificar este valor.'});	
+	}
 	const fechaNumber = req.body.fechaNumber;
 	const game = req.body.game;
 
@@ -54,6 +60,9 @@ exports.addGame = function(req, res, next) {
 };
 
 exports.changeGoals = function(req, res, next) {
+	if(!req.user.canAdmin) {
+		return res.status(422).send({ error: 'Debe ser un administrador para modificar este valor.'});	
+	}
 	const { fechaNumber, juegoNumber, goalsHome, goalsAway } = req.body;
 
 	/* Fecha.findOne({'number': fechaNumber}, function(err, fecha) {
@@ -73,6 +82,9 @@ exports.changeGoals = function(req, res, next) {
 };
 
 exports.deleteFecha = function(req, res, next) {
+	if(!req.user.canAdmin) {
+		return res.status(422).send({ error: 'Debe ser un administrador para modificar este valor.'});	
+	}
 	const { fechaNumber } = req.body;
 
 	Fecha.find({'number': fechaNumber}).remove(function(err) {
@@ -83,6 +95,9 @@ exports.deleteFecha = function(req, res, next) {
 };
 
 exports.deleteGame = function(req, res, next) {
+	if(!req.user.canAdmin) {
+		return res.status(422).send({ error: 'Debe ser un administrador para modificar este valor.'});	
+	}
 	const { fechaNumber, juegoNumber } = req.body;
 
 	Fecha.update({ number: fechaNumber }, { $pull: { games: { number: juegoNumber } }}, function(err) {
