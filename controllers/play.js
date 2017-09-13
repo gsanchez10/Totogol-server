@@ -11,6 +11,15 @@ exports.changePlayerGoals = function(req, res, next) {
       
       fechas.forEach(currentFecha => {
         const systemFecha = systemFechas.find(systemFecha => systemFecha.number === currentFecha.number);
+        currentFecha.games = currentFecha.games.filter(currentGame =>
+          systemFecha.games.find(systemGame =>
+            systemGame.number === currentGame.number &&
+            systemGame.homeTeam === currentGame.homeTeam &&
+            systemGame.awayTeam === currentGame.awayTeam
+          )
+        );
+
+        //console.log('system fecha', systemFecha);
         const fechaToUpdate = userFechas.find(userFecha => currentFecha.number === userFecha.number);
         const now = new Date();
         const closingDate = new Date(systemFecha.closingDate);
@@ -19,6 +28,7 @@ exports.changePlayerGoals = function(req, res, next) {
           userFechas.push(currentFecha);
         }else
         if(now < closingDate) {
+          console.log('now < closing date');
           fechaToUpdate.games = currentFecha.games;
           fechaToUpdate.games = fechaToUpdate.games.filter(gameToUpdate =>
             systemFecha.games.find(systemGame =>
@@ -78,10 +88,8 @@ exports.changePlayerGoals = function(req, res, next) {
     if(user) {
       const userFecha = user.fechas.find(currentFecha => currentFecha.number === fecha.number);
       if(userFecha) {
-        console.log('userFecha.games', userFecha.games);
         const userJuego = userFecha.games.find(currentJuego => currentJuego.number === fecha.games[0].number);
         if(userJuego) {
-          console.log('juego existeeeeeeeeeeeee', fecha.games[0].goalsHome);
           User.update(
             {'username': username, 'fechas.number': fecha.number, 'fechas.games.number': 2},
             {
@@ -97,7 +105,6 @@ exports.changePlayerGoals = function(req, res, next) {
             }
           );
         }else {
-          console.log('juego noooooooooooo existeeeeeeeeeeeee');
           User.update(
             {'username': username, 'fechas.number': fecha.number},
             {
@@ -111,7 +118,6 @@ exports.changePlayerGoals = function(req, res, next) {
           );
         }
       }else {
-        console.log('fecha no existe');
         User.update(
           {'username': username, 'fechas.number': fecha.number},
           {
@@ -131,8 +137,6 @@ exports.changePlayerGoals = function(req, res, next) {
 
 exports.getPlayersFechas = function(req, res, next) {
   const { username } = req.query;
-
-  console.log('username', username);
 
   User.findOne({'username': username}, function(err, user) {    
     if(err) { return next(err); }
