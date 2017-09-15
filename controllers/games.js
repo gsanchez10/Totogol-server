@@ -1,4 +1,5 @@
 const Fecha = require('../models/fecha');
+const User = require('../models/user');
 const config = require('../config');
 
 exports.getFechas = function(req, res, next) {
@@ -90,6 +91,14 @@ exports.deleteFecha = function(req, res, next) {
 	Fecha.find({'number': fechaNumber}).remove(function(err) {
 		if(err) { return next(err); }
 
+		User.update(
+			{},
+			{ $pull: { fechas: { number: fechaNumber } }},
+			function(err) {
+				if(err) { return next(err); }
+			}
+		);
+
 		res.json({ result: true });
 	});
 };
@@ -102,6 +111,14 @@ exports.deleteGame = function(req, res, next) {
 
 	Fecha.update({ number: fechaNumber }, { $pull: { games: { number: juegoNumber } }}, function(err) {
 		if(err) { return next(err); }
+
+		/*User.update(
+			{},
+			{ $pull: { fechas.games.number: { number: fechaNumber, games.$.number: juegoNumber } }},
+			function(err) {
+				if(err) { return next(err); }
+			}
+		);*/
 
 		res.json({ result: true });
 	});
