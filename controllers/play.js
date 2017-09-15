@@ -5,31 +5,46 @@ const _ = require('lodash');
 exports.changePlayerGoals = function(req, res, next) {
   const { fechas, username } = req.body;
 
+  /*Fecha.find({}, function(err, systemFechas) {
+    User.findOne({'username': username}, function(err, user) {
+      const changedFecha = Object.assign({}, 
+        user.fechas.find(userFecha => userFecha.number === fecha.fechaNumber) ||
+        systemFechas.find(systemFecha => systemFecha.number === fecha.fechaNumber)
+      );
+
+      changedFecha.games = changedFecha.games.map(changedFechaGame => {
+        if(changedFechaGame.number === params.juegoNumber) {
+          const changedGame = Object.assign({}, changedFechaGame);
+          changedGame.goalsHome = params.goalsHome;
+          changedGame.goalsAway = params.goalsAway;
+
+          return changedGame;
+        }
+
+          return changedFechaGame;      
+      });
+    });
+  });*/
+
   Fecha.find({}, function(err, systemFechas) {
     User.findOne({'username': username}, function(err, user) {
       const userFechas = _.cloneDeep(user.fechas);
       
-      fechas.forEach(currentFecha => {
-        const systemFecha = systemFechas.find(systemFecha => systemFecha.number === currentFecha.number);
-        currentFecha.games = currentFecha.games.filter(currentGame =>
-          systemFecha.games.find(systemGame =>
-            systemGame.number === currentGame.number &&
-            systemGame.homeTeam === currentGame.homeTeam &&
-            systemGame.awayTeam === currentGame.awayTeam
-          )
-        );
+      fechas.forEach(paramsFecha => {
+        const systemFecha = systemFechas.find(systemFecha => systemFecha.number === paramsFecha.number);
 
         //console.log('system fecha', systemFecha);
-        const fechaToUpdate = userFechas.find(userFecha => currentFecha.number === userFecha.number);
+        const fechaToUpdate = userFechas.find(userFecha => paramsFecha.number === userFecha.number);
+        console.log('fecha del usuario que vamos a modificar', fechaToUpdate);
         const now = new Date();
         const closingDate = new Date(systemFecha.closingDate);
 
         if(!fechaToUpdate) {
-          userFechas.push(currentFecha);
+          userFechas.push(paramsFecha);
         }else
         if(now < closingDate) {
-          console.log('now < closing date');
-          fechaToUpdate.games = currentFecha.games;
+          //console.log('paramsFecha.games', paramsFecha.games);
+          fechaToUpdate.games = paramsFecha.games;
           fechaToUpdate.games = fechaToUpdate.games.filter(gameToUpdate =>
             systemFecha.games.find(systemGame =>
               systemGame.number === gameToUpdate.number &&
@@ -45,7 +60,7 @@ exports.changePlayerGoals = function(req, res, next) {
         {new: true},
         function(err, updatedRows) {
           if(err) { return next(err); }
-          console.log('updated rows', updatedRows.fechas[3]);
+          console.log('updated rows', updatedRows.fechas[0]);
           res.json({ result: true, user: updatedRows });
         }
       );
